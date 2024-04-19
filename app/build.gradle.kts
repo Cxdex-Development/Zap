@@ -5,11 +5,11 @@ plugins {
     id("com.google.gms.google-services")
 }
 android {
-    namespace = "de.theskyscout.template"
+    namespace = "de.theskyscout.zap"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "de.theskyscout.template"
+        applicationId = "de.theskyscout.zap"
         minSdk = 34
         targetSdk = 34
         versionCode = 1
@@ -57,5 +57,10 @@ dependencies {
     // Realm
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.0")
     implementation("io.realm.kotlin:library-sync:1.14.1")
+
+    implementation("com.github.bumptech.glide:glide:4.16.0")
+    implementation("com.github.Dimezis:BlurView:version-2.0.3")
+
+    implementation("net.yslibrary.keyboardvisibilityevent:keyboardvisibilityevent:3.0.0-RC3")
 
 }

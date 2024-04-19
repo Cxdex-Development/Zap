@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/clChatChat"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    tools:context=".activities.CodexActivity"
+    android:background="@color/background">
+
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="70dp"
+        app:cardBackgroundColor="@android:color/transparent">
+
+        <eightbitlab.com.blurview.BlurView
+            android:id="@+id/bvChatHeader"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:blurOverlayColor="@color/background_darkest_transparent">
+        </eightbitlab.com.blurview.BlurView>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/gradient_darkest_transparent">
+        </LinearLayout>
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="15dp"
+            android:orientation="horizontal">
+
+            <com.google.android.material.imageview.ShapeableImageView
+                android:id="@+id/ivChatBack"
+                android:layout_width="25dp"
+                android:layout_height="25dp"
+                android:layout_marginEnd="10dp"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_back"
+                />
+
+            <com.google.android.material.imageview.ShapeableImageView
+                android:id="@+id/ivChatChatProfileImage"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_account"
+                app:shapeAppearanceOverlay="@style/circular"
+                />
+
+            <TextView
+                android:id="@+id/tvChatChatName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="left"
+                android:layout_gravity="center"
+                android:layout_marginStart="10dp"
+                android:textSize="18sp"
+                android:fontFamily="sans-serif-medium"
+                android:textColor="@color/primary"
+                android:textStyle="bold"
+                android:text="Max Mustermann">
+            </TextView>
+
+            <Space
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_weight="1" />
+
+            <com.google.android.material.imageview.ShapeableImageView
+                android:id="@+id/ivChatCall"
+                android:layout_width="25dp"
+                android:layout_height="25dp"
+                android:layout_marginEnd="10dp"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_call_blue"
+                />
+
+        </LinearLayout>
+
+    </androidx.cardview.widget.CardView>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvChatMessages"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clipToPadding="false"
+        android:paddingTop="70dp"
+        android:paddingBottom="75dp"
+        tools:listitem="@layout/item_message">
+
+    </androidx.recyclerview.widget.RecyclerView>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_gravity="bottom"
+        android:layout_margin="10dp"
+        android:orientation="horizontal">
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/etChatChatMessage"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            app:expandedHintEnabled="false"
+            app:hintEnabled="false"
+            android:layout_marginEnd="10dp"
+            app:hintTextAppearance="@color/primary"
+            app:boxBackgroundColor="@color/background_darkest_transparent_2"
+            app:boxCornerRadiusTopStart="20dp"
+            app:boxCornerRadiusTopEnd="20dp"
+            app:boxCornerRadiusBottomStart="20dp"
+            app:boxCornerRadiusBottomEnd="20dp"
+            app:boxStrokeWidth="0dp"
+            app:boxStrokeWidthFocused="1dp"
+            app:boxStrokeColor="@color/primary">
+
+            <eightbitlab.com.blurview.BlurView
+                android:id="@+id/bvChatChatMessage"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/square_rounded"
+                app:blurOverlayColor="@color/background_darkest_transparent_2">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etChatChatMessageInput"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:hint="Message"
+                    android:textColor="@color/text">
+                </com.google.android.material.textfield.TextInputEditText>
+            </eightbitlab.com.blurview.BlurView>
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+
+        <eightbitlab.com.blurview.BlurView
+            android:id="@+id/bvChatChatSend"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_gravity="center"
+            android:padding="10dp"
+            android:background="@drawable/circle_t"
+            app:blurOverlayColor="@color/background_darkest_transparent">
+
+
+            <com.google.android.material.imageview.ShapeableImageView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_send"
+                app:shapeAppearanceOverlay="@style/circular"
+                />
+        </eightbitlab.com.blurview.BlurView>
+
+
+    </LinearLayout>
+
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

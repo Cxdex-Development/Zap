@@ -14,6 +14,7 @@ playServicesAuth = "21.1.0"
 playServicesBase = "18.4.0"
 googleServices = "4.4.1"
 firebaseAuth = "22.3.1"
+blurkit = "1.1.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -29,6 +30,7 @@ play-services-auth = { group = "com.google.android.gms", name = "play-services-a
 play-services-base = { group = "com.google.android.gms", name = "play-services-base", version.ref = "playServicesBase" }
 google-services = { group = "com.google.gms", name = "google-services", version.ref = "googleServices" }
 firebase-auth = { group = "com.google.firebase", name = "firebase-auth", version.ref = "firebaseAuth" }
+blurkit = { group = "io.alterac.blurkit", name = "blurkit", version.ref = "blurkit" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

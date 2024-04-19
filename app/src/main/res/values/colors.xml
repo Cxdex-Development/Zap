@@ -1,5 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="black">#FF000000</color>
-    <color name="white">#FFFFFFFF</color>
+    <color name="background">#121C1F</color>
+    <color name="background_darker">#0E161A</color>
+    <color name="background_darkest">#0A1012</color>
+    <color name="background_darkest_transparent">#B30A1012</color>
+    <color name="background_darkest_transparent_2">#D90A1012</color>
+    <color name="background_lighter">#20313D</color>
+    <color name="primary">#33aae5</color>
+    <color name="secondary">#257AA4</color>
+    <color name="accent">#def2f1</color>
+    <color name="text">	#feffff</color>
+    <color name="green">#43FC43</color>
+    <color name="red">#FF0000</color>
 </resources>
