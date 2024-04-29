@@ -25,6 +25,7 @@ import de.theskyscout.zap.database.models.Chat
 import de.theskyscout.zap.database.models.Message
 import de.theskyscout.zap.database.models.MessageStatus
 import de.theskyscout.zap.database.models.MessageStatusChange
+import de.theskyscout.zap.database.models.User
 import de.theskyscout.zap.databinding.ActivityChatBinding
 import de.theskyscout.zap.fragments.ChatsFragment
 import de.theskyscout.zap.listener.SwipeListener
@@ -59,6 +60,10 @@ class ChatActivity : CodexActivity() {
     private lateinit var statusListener: ValueEventListener
     private lateinit var messageListener: ValueEventListener
 
+    val chat
+        get() = UserCache.currentUser?.chats?.find { it.receiver_id == ChatsFragment.opendChat?.receiver_id && it.sender_id == ChatsFragment.opendChat?.sender_id}!!
+
+
     @SuppressLint("ClickableViewAccessibility", "NotifyDataSetChanged")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -67,8 +72,6 @@ class ChatActivity : CodexActivity() {
         setContentView(R.layout.activity_chat)
 
         view = binding.root
-
-        val chat = ChatsFragment.opendChat
 
         if(chat == null) {
             swapToActivity(MainActivity::class.java)
@@ -129,17 +132,20 @@ class ChatActivity : CodexActivity() {
                     if (message.receiver_id == chat.sender_id && message.sender_id == chat.receiver_id) {
                         Log.d("ChatActivity", "Message received: ${message.message}")
                         if(dataList.map { it.id }.contains(message.id)) return
-                        dataList.add(message)
+                        chat.messages.add(message)
+                        dbMain.updateChatForBothUsers(chat)
+
+                        //Sending message status
                         MessageManager(message).read()
+
+                        //Adding message to the list
+                        dataList.add(message)
                         adapter.notifyDataSetChanged()
                         recyclerView.scrollToPosition(dataList.size - 1)
-                        snapshot.ref.removeValue()
-                        dbMain.updateChatForBothUsers(chat)
-                        UserCache.getUser(chat.receiver_id!!)?.let { user ->
-                            user.chats.find { it.sender_id == chat.sender_id && it.receiver_id == chat.receiver_id }?.let {
-                                it.messages.add(message)
-                            }
+                        UserCache.getUser(chat.sender_id!!)!!.chats.find { it.sender_id == chat.receiver_id && it.receiver_id == chat.sender_id }?.let {
+                            it.messages.add(message)
                         }
+                        snapshot.ref.removeValue()
                     }
                 }
             }
@@ -180,24 +186,26 @@ class ChatActivity : CodexActivity() {
         }
 
         blurViewSend.setOnClickListener {
-            val calendar = Calendar.getInstance()
-            var hour = calendar.get(Calendar.HOUR_OF_DAY).toString()
-            var minute = calendar.get(Calendar.MINUTE).toString()
-            if (hour.length == 1) hour = "0$hour"
-            if (minute.length == 1) minute = "0$minute"
+            val time = getTime()
             val message = chatInput.text.toString()
             if (message.isNotEmpty()) {
                 val newMessage = Message().apply {
                     this.id = UUID.randomUUID().toString()
                     this.message = message
-                    this.time = "$hour:$minute"
+                    this.time = time
                     this.sender_id = chat.sender_id
                     this.receiver_id = chat.receiver_id
                     this.status = MessageStatus.SENT
                 }
+                chat.messages.add(newMessage)
+
+                //Uploading message to database
+                activity.dbMain.updateChatForBothUsers(chat)
+                LiveDatabase.writeNewMessage(newMessage)
+
+                //Adding message to the list
                 dataList.add(newMessage)
                 adapter.notifyDataSetChanged()
-                chat.messages.add(newMessage)
                 UserCache.getUser(chat.receiver_id!!)?.let { user ->
                     user.chats.find { it.sender_id == chat.sender_id && it.receiver_id == chat.receiver_id }?.let {
                         it.messages.add(newMessage)
@@ -205,8 +213,6 @@ class ChatActivity : CodexActivity() {
                 }
                 chatInput.setText("")
                 recyclerView.scrollToPosition(dataList.size - 1)
-                LiveDatabase.writeNewMessage(newMessage)
-                activity.dbMain.updateChatForBothUsers(chat)
             }
         }
 
@@ -226,7 +232,7 @@ class ChatActivity : CodexActivity() {
         }
 
         swipeListener = SwipeListener(this).apply {
-            onSwipeDown = {
+            onSwipeLeft = {
                 if (chatInput.isFocused) {
                     chatInput.clearFocus()
                     // Show keyboard
@@ -252,11 +258,27 @@ class ChatActivity : CodexActivity() {
 
 
     private fun readMessages(chat: Chat) {
-        chat.messages.filter { it.status == MessageStatus.SENT  && it.sender_id!! == chat.sender_id}.forEach {
-            MessageManager(it).read()
+    chat.messages.filter { it.status != MessageStatus.READ  && it.receiver_id!! == chat.sender_id}.forEach {
+            it.status = MessageStatus.READ
+            val messageStatusChange = MessageStatusChange().apply {
+                this.message_id = it.id
+                this.receiver_id = it.receiver_id
+                this.sender_id = it.sender_id
+                this.status = MessageStatus.READ
+            }
+
+            LiveDatabase.writeMessageStatus(messageStatusChange)
         }
         dbMain.updateChatForBothUsers(chat)
+    }
 
+    private fun getTime(): String {
+        val calendar = Calendar.getInstance()
+        var hour = calendar.get(Calendar.HOUR_OF_DAY).toString()
+        var minute = calendar.get(Calendar.MINUTE).toString()
+        if (hour.length == 1) hour = "0$hour"
+        if (minute.length == 1) minute = "0$minute"
+        return "$hour:$minute"
     }
 
 

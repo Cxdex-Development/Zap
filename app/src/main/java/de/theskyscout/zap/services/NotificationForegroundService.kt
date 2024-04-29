@@ -1,5 +1,6 @@
 package de.theskyscout.zap.services
 
+import android.app.NotificationManager
 import android.app.Service
 import android.content.Intent
 import android.os.IBinder
@@ -22,10 +23,10 @@ class NotificationForegroundService: Service() {
         var isNotificationServiceRunning = false
     }
 
-    private val notificationManager = MainActivity.notificationManager
     private lateinit var messageListener: ValueEventListener
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        val notificationManager = ZapNotificationManager(this)
         this.startForeground(1, notificationManager.getStartNotification())
         isNotificationServiceRunning = true
         Log.d("NotifiService", "Listening for messages")

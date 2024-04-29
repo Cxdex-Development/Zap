@@ -10,13 +10,20 @@ import android.view.ViewOutlineProvider
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.RecyclerView
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.ValueEventListener
 import de.theskyscout.zap.R
 import de.theskyscout.zap.activities.AddChatActivity
 import de.theskyscout.zap.activities.ChatActivity
 import de.theskyscout.zap.activities.CodexActivity
+import de.theskyscout.zap.database.LiveDatabase
 import de.theskyscout.zap.database.models.Chat
+import de.theskyscout.zap.database.models.Message
 import de.theskyscout.zap.utils.Cache
+import de.theskyscout.zap.utils.MessageManager
 import de.theskyscout.zap.utils.UserCache
+import de.theskyscout.zap.utils.UserManager
 import de.theskyscout.zap.utils.adapter.RecycleChatsAdapter
 import de.theskyscout.zap.utils.adapter.RecycleChatOnTouchListener
 import eightbitlab.com.blurview.BlurView
@@ -36,6 +43,9 @@ class ChatsFragment(
     private lateinit var blurView: BlurView
     private lateinit var btnAdd: BlurView
     private lateinit var tvNoChats: TextView
+
+    //Listeners
+    private lateinit var messageListener : ValueEventListener
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -80,8 +90,41 @@ class ChatsFragment(
         recyclerView.adapter = adapter
 
 
-    btnAdd.setOnClickListener {
-        activity.swapToActivity(AddChatActivity::class.java)
+        btnAdd.setOnClickListener {
+            activity.swapToActivity(AddChatActivity::class.java)
+        }
+
+        messageListener = object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val message = snapshot.getValue(Message::class.java)
+                val user = UserCache.currentUser
+                if (message != null) {
+                    if (message.receiver_id!! == user!!.owner_id) {
+                        val chat = chats.find { it.sender_id == message.sender_id || it.receiver_id == message.sender_id }
+                        if (chat != null) {
+                            if (chat.messages.find { it.id == message.id } == null) {
+                                chat.messages.add(message)
+                                UserManager(user).updateChat(chat)
+                                val chatIndex = chats.indexOf(chat)
+                                adapter.notifyItemChanged(chatIndex)
+                                snapshot.ref.removeValue()
+                            }
+                        }
+                    }
+                }
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                Log.d("ChatActivity", "Failed to read value.", error.toException())
+            }
+
+        }
+
+        LiveDatabase.messages.addValueEventListener(messageListener)
     }
+
+    override fun onDestroy() {
+        LiveDatabase.messages.removeEventListener(messageListener)
+        super.onDestroy()
     }
 }

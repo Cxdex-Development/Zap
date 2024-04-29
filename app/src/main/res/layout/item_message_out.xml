@@ -8,6 +8,18 @@
     android:gravity="end"
     android:orientation="vertical">
 
+    <com.google.android.material.imageview.ShapeableImageView
+        android:id="@+id/ivChatMessageTail"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:layout_alignEnd="@id/cvChatMessage"
+        android:layout_alignBottom="@id/cvChatMessage"
+        android:layout_marginEnd="-10.5dp"
+        android:layout_marginBottom="4dp"
+        android:src="@drawable/bubble_tail_right">
+
+    </com.google.android.material.imageview.ShapeableImageView>
+
     <androidx.cardview.widget.CardView
         android:id="@+id/cvChatMessage"
         android:layout_width="wrap_content"
@@ -17,6 +29,9 @@
         android:layout_marginEnd="15dp"
         app:cardCornerRadius="10dp"
         app:cardElevation="0dp"
+        android:focusable="true"
+        android:clickable="true"
+        android:foreground="?android:attr/selectableItemBackground"
         app:cardBackgroundColor="@color/primary">
 
         <LinearLayout
@@ -51,18 +66,6 @@
             android:fontFamily="sans-serif" />
 
     </androidx.cardview.widget.CardView>
-
-    <com.google.android.material.imageview.ShapeableImageView
-        android:id="@+id/ivChatMessageTail"
-        android:layout_width="20dp"
-        android:layout_height="20dp"
-        android:layout_alignEnd="@id/cvChatMessage"
-        android:layout_alignBottom="@id/cvChatMessage"
-        android:layout_marginEnd="-10.5dp"
-        android:layout_marginBottom="4dp"
-        android:src="@drawable/bubble_tail_right">
-
-    </com.google.android.material.imageview.ShapeableImageView>
 
     <TextView
         android:id="@+id/tvChatMessageStatus"

@@ -16,6 +16,9 @@
         android:orientation="horizontal"
         android:padding="10dp"
         android:background="@color/background_darker"
+        android:focusable="true"
+        android:clickable="true"
+        android:foreground="?android:attr/selectableItemBackground"
         tools:ignore="MissingConstraints">
 
         <com.google.android.material.imageview.ShapeableImageView

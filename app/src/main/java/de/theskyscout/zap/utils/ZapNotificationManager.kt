@@ -28,10 +28,11 @@ class ZapNotificationManager(
     fun sendNotification(title: String, message: String, obj: Any? = null) {
         val activityIntent = Intent(context, MainActivity::class.java)
         activityIntent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
+        val id = getNotificationId(obj)
         activityIntent.putExtra("notification", true)
         val pendingIntent = PendingIntent.getActivity(
             context,
-            getNotificationId(),
+            id,
             activityIntent,
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) PendingIntent.FLAG_IMMUTABLE else 0
         )
@@ -43,7 +44,7 @@ class ZapNotificationManager(
             .setAutoCancel(true)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .build()
-        notificationManager.notify(1, notification)
+        notificationManager.notify(id, notification)
     }
 
     fun sendNotification(message: Message) {

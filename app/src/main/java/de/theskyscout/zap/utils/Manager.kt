@@ -52,16 +52,7 @@ class MessageManager (val message: Message) {
             this.sender_id = message.sender_id
             this.status = MessageStatus.READ
         }
-        val map = MainActivity.notificationManager.getCountMap()
-        if (map.map { (it.value as Message).id }.contains(message.id)) {
-            Log.d("MessageManager", "Deleting notification")
-            val key = map.filterValues { it == message }.keys.first()
-            MainActivity.notificationManager.deleteNotification(key)
-        } else {
-            Log.d("MessageManager", "Notification not found")
-            Log.d("MessageManager", "Message id: ${message.id}")
-            Log.d("MessageManager", "Notification ids: ${map.map { (it.value as Message).id }}")
-        }
+
         LiveDatabase.writeMessageStatus(messageStatusChange)
     }
 
