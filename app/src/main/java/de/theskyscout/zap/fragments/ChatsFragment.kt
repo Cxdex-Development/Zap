@@ -1,48 +1,41 @@
 package de.theskyscout.zap.fragments
 
 import android.annotation.SuppressLint
-import android.graphics.RenderEffect
-import android.graphics.Shader
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.cardview.widget.CardView
+import android.view.ViewOutlineProvider
+import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.RecyclerView
 import de.theskyscout.zap.R
+import de.theskyscout.zap.activities.AddChatActivity
 import de.theskyscout.zap.activities.ChatActivity
 import de.theskyscout.zap.activities.CodexActivity
 import de.theskyscout.zap.database.models.Chat
-import de.theskyscout.zap.database.models.Message
-import de.theskyscout.zap.database.models.User
+import de.theskyscout.zap.utils.Cache
+import de.theskyscout.zap.utils.UserCache
 import de.theskyscout.zap.utils.adapter.RecycleChatsAdapter
 import de.theskyscout.zap.utils.adapter.RecycleChatOnTouchListener
 import eightbitlab.com.blurview.BlurView
 import eightbitlab.com.blurview.RenderEffectBlur
-import eightbitlab.com.blurview.RenderScriptBlur
-import io.realm.kotlin.ext.realmListOf
-import java.sql.Time
+import kotlinx.coroutines.runBlocking
 
 class ChatsFragment(
     private val activity: CodexActivity
 ) : Fragment() {
 
     companion object {
-        var opendChat = Chat()
-        val user = User().apply {
-            name = "John Doe"
-            profilePictureURI = "https://t3.ftcdn.net/jpg/03/64/62/36/360_F_364623643_58jOINqUIeYmkrH7go1smPaiYujiyqit.jpg"
-        }
-        val me = User().apply {
-            name = "Jane Doe"
-            profilePictureURI = "https://t3.ftcdn.net/jpg/03/64/62/36/360_F_364623643_58jOINqUIeYmkrH7go1smPaiYujiyqit.jpg"
-        }
+        var opendChat: Chat? = null
     }
 
     //Screen elements
     private lateinit var recyclerView: RecyclerView
     private lateinit var blurView: BlurView
+    private lateinit var btnAdd: BlurView
+    private lateinit var tvNoChats: TextView
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -59,48 +52,36 @@ class ChatsFragment(
         //Initialize screen elements
         recyclerView = view.findViewById(R.id.rvChats)
         blurView = view.findViewById(R.id.blurViewChatsHeader)
+        btnAdd = view.findViewById(R.id.btnAddChat)
+        tvNoChats = view.findViewById(R.id.tvNoChats)
+
+        //Set up the blur effect
+
+        btnAdd.setupWith(recyclerView, RenderEffectBlur())
+            .setBlurAutoUpdate(true)
+            .setBlurRadius(15f)
+            .setBlurEnabled(true)
+        btnAdd.outlineProvider = ViewOutlineProvider.BACKGROUND
+        btnAdd.clipToOutline = true
 
         blurView.setupWith(recyclerView, RenderEffectBlur())
             .setBlurAutoUpdate(true)
-            .setBlurRadius(20f)
+            .setBlurRadius(15f)
             .setBlurEnabled(true)
 
-
         recyclerView.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(context)
-        val message1 = Message().apply {
-            message = "Hello there!"
-            time = "12:00"
-            read = false
-            receiver = me
-            sender = user
+        val chats = UserCache.currentUser!!.chats
+        val chats_array = arrayListOf<Chat>()
+        chats_array.addAll(chats)
+        if (chats.isEmpty()) {
+            tvNoChats.visibility = View.VISIBLE
         }
-        val message2 = Message().apply {
-            message = "General Kenobi!"
-            time = "12:22"
-            read = false
-            receiver = user
-            sender = me
-        }
-        val chat = Chat().apply {
-            receiver = user
-            messages = realmListOf(message1, message2)
-        }
-        val chats = arrayListOf(
-            Chat().apply {
-                receiver = user
-                sender = me
-                messages = realmListOf(message1, message2, message1, message1, message2, message1, message1, message2, message1, message1, message2, message1, message1, message2, message1, message1, message2, message1, )
-            }, chat, chat, chat, chat, chat, chat, chat, chat, chat, chat, chat
-
-
-        )
-        val adapter = RecycleChatsAdapter(chats)
+        val adapter = RecycleChatsAdapter(chats_array, activity)
         recyclerView.adapter = adapter
-        val listener = RecycleChatOnTouchListener {
-            val position = recyclerView.getChildAdapterPosition(it)
-            opendChat = chats[position]
-            activity.swapToActivity(ChatActivity::class.java)
-        }
-        recyclerView.addOnItemTouchListener(listener)
+
+
+    btnAdd.setOnClickListener {
+        activity.swapToActivity(AddChatActivity::class.java)
+    }
     }
 }

@@ -1,12 +1,10 @@
 package de.theskyscout.zap.activities
 
 import android.annotation.SuppressLint
-import android.graphics.Rect
 import android.os.Bundle
 import android.util.Log
 import android.view.MotionEvent
 import android.view.View
-import android.view.ViewGroup
 import android.view.ViewOutlineProvider
 import android.view.inputmethod.InputMethodManager
 import android.widget.TextView
@@ -16,25 +14,36 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.imageview.ShapeableImageView
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
+import com.google.firebase.Firebase
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.ValueEventListener
 import de.theskyscout.zap.MainActivity
 import de.theskyscout.zap.R
+import de.theskyscout.zap.database.LiveDatabase
+import de.theskyscout.zap.database.models.Chat
 import de.theskyscout.zap.database.models.Message
+import de.theskyscout.zap.database.models.MessageStatus
+import de.theskyscout.zap.database.models.MessageStatusChange
 import de.theskyscout.zap.databinding.ActivityChatBinding
 import de.theskyscout.zap.fragments.ChatsFragment
 import de.theskyscout.zap.listener.SwipeListener
+import de.theskyscout.zap.utils.ChatManager
+import de.theskyscout.zap.utils.MessageManager
+import de.theskyscout.zap.utils.UserCache
 import de.theskyscout.zap.utils.adapter.RecycleMessagesAdapter
 import eightbitlab.com.blurview.BlurView
 import eightbitlab.com.blurview.RenderEffectBlur
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent
-import java.sql.Time
 import java.util.Calendar
+import java.util.UUID
 
 class ChatActivity : CodexActivity() {
 
     //Screen elements
     private lateinit var chatName: TextView
     private lateinit var chatImage: ShapeableImageView
-    private lateinit var chatBack: ShapeableImageView
+    private lateinit var chatBack: CardView
     private lateinit var recyclerView: RecyclerView
     private lateinit var blurView: BlurView
     private lateinit var blurViewMessage: BlurView
@@ -47,6 +56,9 @@ class ChatActivity : CodexActivity() {
 
     private lateinit var view: View
 
+    private lateinit var statusListener: ValueEventListener
+    private lateinit var messageListener: ValueEventListener
+
     @SuppressLint("ClickableViewAccessibility", "NotifyDataSetChanged")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -58,6 +70,14 @@ class ChatActivity : CodexActivity() {
 
         val chat = ChatsFragment.opendChat
 
+        if(chat == null) {
+            swapToActivity(MainActivity::class.java)
+            return
+        }
+
+        readMessages(chat)
+
+
         //Initialize screen elements
         chatName = findViewById(R.id.tvChatChatName)
         chatImage = findViewById(R.id.ivChatChatProfileImage)
@@ -65,7 +85,7 @@ class ChatActivity : CodexActivity() {
         blurView = findViewById(R.id.bvChatHeader)
         blurViewMessage = findViewById(R.id.bvChatChatMessage)
         blurViewSend = findViewById(R.id.bvChatChatSend)
-        chatBack = findViewById(R.id.ivChatBack)
+        chatBack = findViewById(R.id.cvChatBack)
         chatInput = findViewById(R.id.etChatChatMessageInput)
         chatInputLayout = findViewById(R.id.etChatChatMessage)
         coordinatorLayout = findViewById(R.id.clChatChat)
@@ -90,15 +110,70 @@ class ChatActivity : CodexActivity() {
         blurViewSend.outlineProvider = ViewOutlineProvider.BACKGROUND
         blurViewSend.clipToOutline = true
 
-
         recyclerView.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(this)
         val dataList = arrayListOf<Message>()
         dataList.addAll(chat.messages)
-        val adapter = RecycleMessagesAdapter(dataList, chat)
+        val adapter = RecycleMessagesAdapter(dataList, chat, this)
         recyclerView.adapter = adapter
         recyclerView.scrollToPosition(dataList.size - 1)
 
-        chatName.text = chat.receiver!!.name
+
+        val user = UserCache.getUser(chat.receiver_id!!)
+        chatName.text = user!!.name ?: "Unknown"
+
+        //Live listeners
+        messageListener = object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val message = snapshot.getValue(Message::class.java)
+                if (message != null) {
+                    if (message.receiver_id == chat.sender_id && message.sender_id == chat.receiver_id) {
+                        Log.d("ChatActivity", "Message received: ${message.message}")
+                        if(dataList.map { it.id }.contains(message.id)) return
+                        dataList.add(message)
+                        MessageManager(message).read()
+                        adapter.notifyDataSetChanged()
+                        recyclerView.scrollToPosition(dataList.size - 1)
+                        snapshot.ref.removeValue()
+                        dbMain.updateChatForBothUsers(chat)
+                        UserCache.getUser(chat.receiver_id!!)?.let { user ->
+                            user.chats.find { it.sender_id == chat.sender_id && it.receiver_id == chat.receiver_id }?.let {
+                                it.messages.add(message)
+                            }
+                        }
+                    }
+                }
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                Log.d("ChatActivity", "Failed to read value.", error.toException())
+            }
+
+        }
+        LiveDatabase.messages.addValueEventListener(messageListener)
+
+        statusListener = object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val statusChange = snapshot.getValue(MessageStatusChange::class.java)
+                if (statusChange != null) {
+                    if (statusChange.receiver_id == chat.receiver_id && statusChange.sender_id == chat.sender_id) {
+                        val message = dataList.find { it.id == statusChange.message_id }
+                        if (message != null) {
+                            val index = dataList.indexOf(message)
+                            dataList.get(index).status = statusChange.status
+                            adapter.notifyDataSetChanged()
+                        }
+                        snapshot.ref.removeValue()
+                    }
+                }
+            }
+            override fun onCancelled(error: DatabaseError) {
+                Log.d("ChatActivity", "Failed to read value.", error.toException())
+            }
+
+        }
+
+        LiveDatabase.messsageStatus.addValueEventListener(statusListener)
+
 
         chatBack.setOnClickListener {
             swapToActivity(MainActivity::class.java)
@@ -106,21 +181,32 @@ class ChatActivity : CodexActivity() {
 
         blurViewSend.setOnClickListener {
             val calendar = Calendar.getInstance()
-            val hour = calendar.get(Calendar.HOUR_OF_DAY)
-            val minute = calendar.get(Calendar.MINUTE)
+            var hour = calendar.get(Calendar.HOUR_OF_DAY).toString()
+            var minute = calendar.get(Calendar.MINUTE).toString()
+            if (hour.length == 1) hour = "0$hour"
+            if (minute.length == 1) minute = "0$minute"
             val message = chatInput.text.toString()
             if (message.isNotEmpty()) {
-                val messageObj = Message().apply {
+                val newMessage = Message().apply {
+                    this.id = UUID.randomUUID().toString()
                     this.message = message
                     this.time = "$hour:$minute"
-                    this.read = false
-                    this.receiver = chat.receiver
-                    this.sender = ChatsFragment.me
+                    this.sender_id = chat.sender_id
+                    this.receiver_id = chat.receiver_id
+                    this.status = MessageStatus.SENT
                 }
-                dataList.add(messageObj)
+                dataList.add(newMessage)
                 adapter.notifyDataSetChanged()
-                chatInput.text?.clear()
+                chat.messages.add(newMessage)
+                UserCache.getUser(chat.receiver_id!!)?.let { user ->
+                    user.chats.find { it.sender_id == chat.sender_id && it.receiver_id == chat.receiver_id }?.let {
+                        it.messages.add(newMessage)
+                    }
+                }
+                chatInput.setText("")
                 recyclerView.scrollToPosition(dataList.size - 1)
+                LiveDatabase.writeNewMessage(newMessage)
+                activity.dbMain.updateChatForBothUsers(chat)
             }
         }
 
@@ -130,16 +216,10 @@ class ChatActivity : CodexActivity() {
             }
         }
 
-        chatInput.setOnEditorActionListener { _, _, _ ->
-            blurView.performClick()
-            true
-        }
-
         KeyboardVisibilityEvent.setEventListener(this) { isOpen ->
             if (isOpen) {
                 recyclerView.scrollToPosition(dataList.size - 1)
             } else {
-                recyclerView.scrollToPosition(dataList.size - 1)
                 chatInput.clearFocus()
 
             }
@@ -157,6 +237,12 @@ class ChatActivity : CodexActivity() {
         }
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        LiveDatabase.messages.removeEventListener(messageListener)
+        LiveDatabase.messsageStatus.removeEventListener(statusListener)
+    }
+
     override fun dispatchTouchEvent(event: MotionEvent?): Boolean {
         if (event == null) return false
         swipeListener.onTouch(view, event)
@@ -164,6 +250,14 @@ class ChatActivity : CodexActivity() {
         return false
     }
 
+
+    private fun readMessages(chat: Chat) {
+        chat.messages.filter { it.status == MessageStatus.SENT  && it.sender_id!! == chat.sender_id}.forEach {
+            MessageManager(it).read()
+        }
+        dbMain.updateChatForBothUsers(chat)
+
+    }
 
 
     @Deprecated("Deprecated in Java")

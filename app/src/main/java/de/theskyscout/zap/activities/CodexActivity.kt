@@ -5,7 +5,7 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.viewbinding.ViewBinding
 import com.google.android.gms.auth.api.identity.Identity
-import de.theskyscout.findex.database.MongoDB
+import de.theskyscout.zap.database.FireBase
 import de.theskyscout.zap.signIn.GoogleAuthClient
 
 open class CodexActivity : AppCompatActivity() {
@@ -13,7 +13,7 @@ open class CodexActivity : AppCompatActivity() {
     lateinit var binding: ViewBinding
     lateinit var activity: CodexActivity
     lateinit var googleAuthClient: GoogleAuthClient
-    val database = MongoDB
+    val dbMain = FireBase
 
 
     fun <T : CodexActivity> swapToActivity(activity: Class<T>) {

@@ -3,8 +3,8 @@
     <color name="background">#121C1F</color>
     <color name="background_darker">#0E161A</color>
     <color name="background_darkest">#0A1012</color>
-    <color name="background_darkest_transparent">#B30A1012</color>
-    <color name="background_darkest_transparent_2">#D90A1012</color>
+    <color name="background_darkest_transparent">#CC0A1012</color>
+    <color name="background_darkest_transparent_2">#990E161A</color>
     <color name="background_lighter">#20313D</color>
     <color name="primary">#33aae5</color>
     <color name="secondary">#257AA4</color>

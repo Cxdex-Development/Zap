@@ -5,8 +5,8 @@ import android.view.ViewGroup
 import de.theskyscout.zap.R
 import de.theskyscout.zap.activities.CodexActivity
 
-class PopUp(
-    override val activity: CodexActivity,
+open class PopUp(
+    final override val activity: CodexActivity,
     override val layout: Int,
     backgroundID: Int? = null,
     cancelable: Boolean? = null,

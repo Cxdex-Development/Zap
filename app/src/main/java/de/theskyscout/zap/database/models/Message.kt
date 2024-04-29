@@ -1,20 +1,28 @@
 package de.theskyscout.zap.database.models
 
-import io.realm.kotlin.types.EmbeddedRealmObject
-import org.mongodb.kbson.ObjectId
 
-class Message : EmbeddedRealmObject {
-    var _id: ObjectId = ObjectId()
-    var sender: User? = null
-    var receiver: User? = null
-    var chat: Chat? = null
+class Message() {
+    var id: String? = null
+    var sender_id: String? = null
+    var receiver_id: String? = null
     var message: String = ""
     var time: String = ""
-    var read: Boolean = false
+    var status: MessageStatus? = null
     var readTime : String? = null
-    var deleted: Boolean = false
-    var edited: Boolean = false
+    var edited: Boolean? = false
     var editedTime: String? = null
     var editedMessage: String? = null
+}
 
+enum class MessageStatus (val text: String) {
+    SENT("Sent"),
+    DELIVERED("Delivered"),
+    READ("Read")
+}
+
+class MessageStatusChange {
+    var message_id: String? = null
+    var receiver_id: String? = null
+    var sender_id: String? = null
+    var status: MessageStatus? = null
 }

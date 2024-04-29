@@ -1,28 +1,28 @@
 {
   "project_info": {
-    "project_number": "749229866304",
-    "project_id": "psyched-axle-417111",
-    "storage_bucket": "psyched-axle-417111.appspot.com"
+    "project_number": "333398058736",
+    "project_id": "android-zap-421216",
+    "storage_bucket": "android-zap-421216.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:749229866304:android:3b89d238d13f6ec4814ea5",
+        "mobilesdk_app_id": "1:333398058736:android:3581784c7b83d3d4c18435",
         "android_client_info": {
           "package_name": "de.theskyscout.zap"
         }
       },
       "oauth_client": [
         {
-          "client_id": "749229866304-60n23eahopfp2k22st2ddhva3q7oeh0s.apps.googleusercontent.com",
+          "client_id": "333398058736-b9abt3isuvthk8n5vrk6v4q7i01oqr7c.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "de.theskyscout.zap",
-            "certificate_hash": "c46f19b7ae0fcb2eb9f3e118c9102d26045d7ba9"
+            "certificate_hash": "8691b74dab675cea609a4df8fb7cc06e934155e9"
           }
         },
         {
-          "client_id": "749229866304-sc3a0uu6aj2qtqi5tdj4el3ioh0ussgu.apps.googleusercontent.com",
+          "client_id": "333398058736-hcpcj2tut1bkti47bg92qbl660odm0cb.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "de.theskyscout.zap",
@@ -30,20 +30,20 @@
           }
         },
         {
-          "client_id": "749229866304-61hc8rr1hg0sgb529ipp6urjeakcjr3g.apps.googleusercontent.com",
+          "client_id": "333398058736-r5oiua0ar3j8ku5nvjf8r248qorpmk8k.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyCPDyL12sCaXnp8RxMq-ycLqVTcarDiAYA"
+          "current_key": "AIzaSyC9kSedD9u_AozGyCL4ffDG9INWwvqh0RM"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "749229866304-61hc8rr1hg0sgb529ipp6urjeakcjr3g.apps.googleusercontent.com",
+              "client_id": "333398058736-r5oiua0ar3j8ku5nvjf8r248qorpmk8k.apps.googleusercontent.com",
               "client_type": 3
             }
           ]

@@ -5,14 +5,20 @@ import com.google.android.gms.auth.api.identity.SignInClient
 import com.google.firebase.Firebase
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.auth
+import com.google.firebase.database.database
 import de.theskyscout.zap.activities.CodexActivity
+import de.theskyscout.zap.utils.Cache
 
 class GoogleAuthClient(
     val onTapClient: SignInClient,
     val activity: CodexActivity
 ) {
-    val auth = Firebase.auth
-    var user = auth.currentUser
+
+    companion object {
+        val auth = Firebase.auth
+        var user = auth.currentUser
+    }
+
     var idToken: String? = null
 
 
@@ -21,7 +27,6 @@ class GoogleAuthClient(
         idToken = googleCredentials.googleIdToken
         if(idToken != null) {
             val firebaseCredentials = GoogleAuthProvider.getCredential(idToken, null)
-
             // Sign in with Firebase Auth
             auth.signInWithCredential(firebaseCredentials)
                 .addOnCompleteListener(activity) { task ->
@@ -32,22 +37,12 @@ class GoogleAuthClient(
                         callback(false, task.exception)
                     }
                 }
-
-            // Sign in with MongoDB Realm
-            activity.database.login(idToken!!) { success, exception ->
-                if(success) {
-                    callback(true, null)
-                } else {
-                    callback(false, exception)
-                }
-            }
         } else {
             callback(false, Exception("Google ID Token is null"))
         }
     }
 
     fun signOut() {
-        activity.database.logout()
         auth.signOut()
         user = null
     }

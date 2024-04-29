@@ -14,20 +14,30 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.imageview.ShapeableImageView
 import de.theskyscout.zap.R
+import de.theskyscout.zap.activities.ChatActivity
+import de.theskyscout.zap.activities.CodexActivity
 import de.theskyscout.zap.database.models.Chat
+import de.theskyscout.zap.database.models.MessageStatus
+import de.theskyscout.zap.fragments.ChatsFragment
+import de.theskyscout.zap.utils.Cache
+import de.theskyscout.zap.utils.SelectListener
+import de.theskyscout.zap.utils.UserCache
+import kotlinx.coroutines.runBlocking
 import java.io.BufferedInputStream
 import java.io.IOException
 import java.net.URL
 
 
-class RecycleChatsAdapter(private val dataList: ArrayList<Chat>):
-    RecyclerView.Adapter<RecycleChatsAdapter.ViewHolder>(){
+class RecycleChatsAdapter(private val dataList: ArrayList<Chat>, private val activity: CodexActivity):
+    RecyclerView.Adapter<RecycleChatsAdapter.ViewHolder>() {
+
+
     class ViewHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
-        var chatName = itemView.findViewById<TextView>(R.id.tvChatItemName)
-        var chatImage = itemView.findViewById<ShapeableImageView>(R.id.ivChatItem)
-        var chatLastMessage = itemView.findViewById<TextView>(R.id.tvChatItemLastMessage)
-        var chatTime = itemView.findViewById<TextView>(R.id.tvChatItemTime)
-        var badge = itemView.findViewById<TextView>(R.id.tvChatItemBadge)
+        val chatName: TextView = itemView.findViewById<TextView>(R.id.tvChatItemName)
+        val chatLastMessage: TextView = itemView.findViewById<TextView>(R.id.tvChatItemLastMessage)
+        val chatTime: TextView = itemView.findViewById<TextView>(R.id.tvChatItemTime)
+        val badge: TextView = itemView.findViewById<TextView>(R.id.tvChatItemBadge)
+        val linearLayout: View = itemView.findViewById<View>(R.id.llChatItem)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -40,37 +50,49 @@ class RecycleChatsAdapter(private val dataList: ArrayList<Chat>):
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.chatName.text = dataList[position].receiver!!.name
 
-        holder.chatTime.text = dataList[position].messages.last().time
-        holder.chatLastMessage.text = dataList[position].messages.last().message
+        val user = UserCache.getUser(dataList[position].receiver_id!!)
+        holder.chatName.text = user!!.name
 
-        val missedMessages = dataList[position].messages.filter { !it.read }.size
+        val lastMessage = dataList[position].messages.last()
+
+        holder.chatTime.text = lastMessage.time
+        holder.chatLastMessage.text = formatLastMesaage(lastMessage.message)
+
+        val me = UserCache.currentUser
+
+        val missedMessages =
+            dataList[position].messages.filter { it.status != MessageStatus.READ && it.sender_id != me!!.owner_id }.size
         if (missedMessages == 0) {
             holder.badge.visibility = View.GONE
         } else {
             holder.badge.visibility = View.VISIBLE
         }
         holder.badge.text = missedMessages.toString()
+
+        holder.linearLayout.setOnClickListener {
+            val chats = UserCache.currentUser!!.chats
+            val chat = chats[position]
+            ChatsFragment.opendChat = chat
+            activity.swapToActivity(ChatActivity::class.java)
+        }
+
     }
 
-    private fun getImageBitmap(url: String): Bitmap? {
-        var bm: Bitmap? = null
-        val policy = ThreadPolicy.Builder().permitAll().build()
-        StrictMode.setThreadPolicy(policy)
-        try {
-            val aURL = URL(url)
-            val conn = aURL.openConnection()
-            conn.connect()
-            val `is` = conn.getInputStream()
-            val bis = BufferedInputStream(`is`)
-            bm = BitmapFactory.decodeStream(bis)
-            bis.close()
-            `is`.close()
-        } catch (e: IOException) {
-            Log.e(TAG, "Error getting bitmap", e)
+    private fun formatLastMesaage(message: String): String {
+        // If the message is longer than 30 characters, it will be cut off but only at spaces
+        val words = message.split(" ")
+        var formattedMessage = ""
+        var currentLine = ""
+        for (word in words) {
+            if (currentLine.length + word.length > 30) {
+                formattedMessage += "$currentLine..."
+                return formattedMessage
+            }
+            currentLine += "$word "
         }
-        return bm
+        formattedMessage += currentLine
+        return formattedMessage
     }
 }
 
