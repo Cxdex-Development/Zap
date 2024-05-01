@@ -37,7 +37,7 @@ class AddChatActivity : CodexActivity() {
             .setBlurRadius(15f)
 
         //Set up recycler view
-        val users = UserCache.users
+        val users = UserCache.users.filter { it.owner_id != UserCache.currentUser!!.owner_id}
         val usersArrayList = ArrayList(users)
         recyclerView.layoutManager = LinearLayoutManager(this)
         val adapter = RecycleAddChatAdapter(usersArrayList, this)

@@ -39,6 +39,10 @@ object FireBase : MongoRepository {
         return collection.document(user.owner_id).set(user).isSuccessful
     }
 
+    fun updateUser(user: User): Boolean {
+        return collection.document(user.owner_id).set(user).isSuccessful
+    }
+
     fun updateChatForBothUsers(chat: Chat, onSuccess: (() -> Unit)? = null) {
         GlobalScope.launch(Dispatchers.IO){
             val senderUser = UserCache.users.find { it.owner_id == chat.sender_id }

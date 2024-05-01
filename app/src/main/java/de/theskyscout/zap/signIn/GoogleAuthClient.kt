@@ -17,9 +17,9 @@ class GoogleAuthClient(
     companion object {
         val auth = Firebase.auth
         var user = auth.currentUser
+        var idToken: String? = null
     }
 
-    var idToken: String? = null
 
 
     fun login(data: Intent?, callback: (Boolean, Exception?) -> Unit?) {

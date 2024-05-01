@@ -17,6 +17,8 @@ firebaseAuth = "22.3.1"
 blurkit = "1.1.1"
 firebaseDatabase = "20.3.1"
 firebaseFirestore = "24.11.1"
+firebaseMessaging = "23.4.1"
+googleAuthLibraryOauth2Http = "1.23.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -35,6 +37,8 @@ firebase-auth = { group = "com.google.firebase", name = "firebase-auth", version
 blurkit = { group = "io.alterac.blurkit", name = "blurkit", version.ref = "blurkit" }
 firebase-database = { group = "com.google.firebase", name = "firebase-database", version.ref = "firebaseDatabase" }
 firebase-firestore = { group = "com.google.firebase", name = "firebase-firestore", version.ref = "firebaseFirestore" }
+firebase-messaging = { group = "com.google.firebase", name = "firebase-messaging", version.ref = "firebaseMessaging" }
+google-auth-library-oauth2-http = { group = "com.google.auth", name = "google-auth-library-oauth2-http", version.ref = "googleAuthLibraryOauth2Http" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

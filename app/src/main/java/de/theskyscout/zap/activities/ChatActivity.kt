@@ -211,6 +211,13 @@ class ChatActivity : CodexActivity() {
                         it.messages.add(newMessage)
                     }
                 }
+
+                // Cloud Messaging
+                val receiver = UserCache.getUser(chat.receiver_id!!)
+                if (receiver != null) {
+                    MainActivity.firebaseMessaging.sendCloudMessage(receiver.fcmToken, user.name, message)
+                }
+
                 chatInput.setText("")
                 recyclerView.scrollToPosition(dataList.size - 1)
             }

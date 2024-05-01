@@ -5,6 +5,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.imageview.ShapeableImageView
 import de.theskyscout.zap.R
 import de.theskyscout.zap.activities.ChatActivity
 import de.theskyscout.zap.activities.CodexActivity
@@ -21,6 +22,7 @@ class RecycleAddChatAdapter(private val dataList: ArrayList<User>, private val a
         var linearLayout = itemView.findViewById<View>(R.id.llAddChatItem)
         var chatName = itemView.findViewById<TextView>(R.id.tvAddChatName)
         var chatBio = itemView.findViewById<TextView>(R.id.tvAddChatBio)
+        val chatIcon = itemView.findViewById<ShapeableImageView>(R.id.ivAddChatItemAdd)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolderAdd {
@@ -35,16 +37,21 @@ class RecycleAddChatAdapter(private val dataList: ArrayList<User>, private val a
     override fun onBindViewHolder(holder: ViewHolderAdd, position: Int) {
         val user = dataList[position]
         holder.chatName.text = user.name
+        val currentUser = UserCache.currentUser
+        if (currentUser!!.chats.any { it.receiver_id == user.owner_id }) {
+            holder.chatIcon.setImageDrawable(activity.getDrawable(R.drawable.ic_check))
+        }
         holder.chatBio.text = formatBioMessage(user.bio) ?: "No bio available"
         holder.linearLayout.setOnClickListener {
-        val chat = Chat().apply {
-            receiver_id = user.owner_id
-            sender_id = UserCache.currentUser!!.owner_id
-            messages = ArrayList()
-        }
-        ChatsFragment.opendChat = chat
-        activity.dbMain.updateChatForBothUsers(chat)
-        activity.swapToActivity(ChatActivity::class.java)
+            if (currentUser.chats.any { it.receiver_id == user.owner_id }) return@setOnClickListener
+            val chat = Chat().apply {
+                receiver_id = user.owner_id
+                sender_id = UserCache.currentUser!!.owner_id
+                messages = ArrayList()
+            }
+            ChatsFragment.opendChat = chat
+            activity.dbMain.updateChatForBothUsers(chat)
+            activity.swapToActivity(ChatActivity::class.java)
 
         }
     }

@@ -7,6 +7,7 @@ class User (
     var email: String = ""
     var chats: ArrayList<Chat> = ArrayList()
     var bio: String? = null
+    var fcmToken = ""
     var profilePictureURI: String? = null
     var status: String = "offline"
 }

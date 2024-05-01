@@ -15,6 +15,7 @@ import de.theskyscout.zap.fragments.ChatsFragment
 import de.theskyscout.zap.screens.popups.RegisterPopup
 import de.theskyscout.zap.services.NotificationForegroundService
 import de.theskyscout.zap.services.NotificationForegroundService.Companion.isNotificationServiceRunning
+import de.theskyscout.zap.services.ZapFirebaseMessaging
 import de.theskyscout.zap.signIn.GoogleAuthClient
 import de.theskyscout.zap.utils.UserCache
 import de.theskyscout.zap.utils.ZapNotificationManager
@@ -29,6 +30,7 @@ class MainActivity : CodexActivity() {
 
     companion object {
         lateinit var notificationManager: ZapNotificationManager
+        lateinit var firebaseMessaging: ZapFirebaseMessaging
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -48,10 +50,10 @@ class MainActivity : CodexActivity() {
                 registerPopup.show()
                 return@cacheRefresh
             }
-
+            firebaseMessaging = ZapFirebaseMessaging()
             if (!isMyServiceRunning(NotificationForegroundService::class.java)) {
                 Log.d("Main", "Starting service")
-                startForegroundService(Intent(this, NotificationForegroundService::class.java))
+                //startForegroundService(Intent(this, NotificationForegroundService::class.java))
             }
 
             binding = ActivityMainBinding.inflate(layoutInflater)
