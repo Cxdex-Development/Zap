@@ -48,6 +48,7 @@ class ZapFirebaseMessaging : FirebaseMessagingService() {
         val title = message.notification?.title ?: "Zap"
         val body = message.notification?.body ?: "New message"
         ZapNotificationManager(this).sendNotification(title, body)
+        //test
         super.onMessageReceived(message)
     }
 
